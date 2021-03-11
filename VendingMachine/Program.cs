@@ -14,6 +14,11 @@ namespace VendingMachine
             [3] = 60,
             [4] = 10,
             [5] = 20,
+            [6] = 40,
+            [7] = 80,
+            [8] = 10,
+            [9] = 10,
+            [10] = 20,
         };
 
         static void Main(string[] args)
@@ -34,7 +39,17 @@ namespace VendingMachine
                         break;
                     case "B":
                     case "BUY":
-                        ChooseProduct();
+                        Console.WriteLine("Choose Product page (1/2)");
+                        userInput = Console.ReadLine();
+                        if (int.TryParse(userInput, out var tmp) && (tmp > 0 && tmp < 3))
+                        {
+                            ChooseProduct(tmp);
+                        }
+                        else
+                        {
+                            Console.WriteLine("product page error");
+                        }
+
                         break;
                     case "C":
                     case "REFUND":
@@ -78,9 +93,10 @@ namespace VendingMachine
 
         }
 
-        static void ChooseProduct()
+        static void ChooseProduct(int page)
         {
-            var productOptions = _productPrices.Select(x => $"Product({x.Key}) Price:{x.Value}");
+            var productOptions = _productPrices.Select(x => $"Product({x.Key}) Price:{x.Value}")
+                .Skip((page - 1) * 5).Take(5);
             Console.WriteLine($"Buy : {string.Join(" , ", productOptions)}. Or Choose (A)Abandon choose product");
             Console.WriteLine($"Please enten number: ");
 
