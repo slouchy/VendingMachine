@@ -115,22 +115,9 @@ namespace VendingMachine
             {
                 var productPrice = selectedProduct.Value;
                 var temperature = "Hot";
-                var ice = string.Empty;
-                var lemon = string.Empty;
-
-                Console.WriteLine("Add Ice (Y/N) ?");
-                userInput = Console.ReadLine();
-                if (userInput.Equals("Y", StringComparison.OrdinalIgnoreCase))
-                {
-                    ice = "added ice";
-                }
-
-                Console.WriteLine("Add lemon (Y/N) ?");
-                userInput = Console.ReadLine();
-                if (userInput.Equals("Y", StringComparison.OrdinalIgnoreCase))
-                {
-                    lemon = "added lemon";
-                }
+                var burdens = new List<string>();
+                burdens.Add(GetAddBurden("ice"));
+                burdens.Add(GetAddBurden("lemon"));
 
                 Console.WriteLine("Choose Product is (C)Cold +$5 or (H)Hot ?");
                 userInput = Console.ReadLine();
@@ -147,10 +134,20 @@ namespace VendingMachine
                 }
                 else
                 {
-                    Console.WriteLine($"Got Product ({selectedProduct.Key}) {temperature} {ice} {lemon}");
+                    var addBurden = burdens.Any() ? $"Added {string.Join(", ", burdens)}" : string.Empty;
+                    Console.WriteLine($"Got Product ({selectedProduct.Key}) {temperature} {addBurden}");
                     _totalAmount -= productPrice;
                 }
             }
+        }
+
+        static string GetAddBurden(string burden)
+        {
+            Console.WriteLine($"Add {burden} (Y/N) ?");
+            var userInput = Console.ReadLine();
+            return userInput.Equals("Y", StringComparison.OrdinalIgnoreCase) ?
+                burden :
+                string.Empty;
         }
     }
 }
