@@ -7,19 +7,81 @@ namespace VendingMachine
     class Program
     {
         private static decimal _totalAmount = 0;
-        private static Dictionary<int, decimal> _productPrices = new Dictionary<int, decimal>()
+        private static List<MyProduct> _products = new List<MyProduct>()
         {
-            [1] = 50,
-            [2] = 30,
-            [3] = 60,
-            [4] = 10,
-            [5] = 20,
-            [6] = 40,
-            [7] = 80,
-            [8] = 10,
-            [9] = 10,
-            [10] = 20,
+            new MyProduct
+            {
+                Location = 1,
+                Key = 1,
+                Price = 50
+            },
+            new MyProduct
+            {
+                Location = 1,
+                Key = 2,
+                Price = 30
+            },
+            new MyProduct
+            {
+                Location = 1,
+                Key = 3,
+                Price = 60
+            },
+            new MyProduct
+            {
+                Location = 1,
+                Key = 4,
+                Price = 10
+            },new MyProduct
+            {
+                Location = 1,
+                Key = 5,
+                Price = 20
+            },
+            new MyProduct
+            {
+                Location = 1,
+                Key = 6,
+                Price = 40
+            },
+            new MyProduct
+            {
+                Location = 2,
+                Key = 7,
+                Price = 80
+            },
+            new MyProduct
+            {
+                Location = 2,
+                Key = 8,
+                Price = 10
+            },new MyProduct
+            {
+                Location = 2,
+                Key = 9,
+                Price = 10
+            },
+            new MyProduct
+            {
+                Location = 2,
+                Key = 10,
+                Price = 20
+            },
+            new MyProduct
+            {
+                Location = 3,
+                Key = 11,
+                Price = 10
+            },
+            new MyProduct
+            {
+                Location = 3,
+                Key = 12,
+                Price = 60
+            },
         };
+
+
 
         static void Main(string[] args)
         {
@@ -95,13 +157,13 @@ namespace VendingMachine
 
         static void ChooseProduct(int page)
         {
-            var productOptions = _productPrices.Select(x => $"Product({x.Key}) Price:{x.Value}")
+            var productOptions = _products.Select(x => $"Product({x.Key}) Price:{x.Price}")
                 .Skip((page - 1) * 5).Take(5);
             Console.WriteLine($"Buy : {string.Join(" , ", productOptions)}. Or Choose (A)Abandon choose product");
             Console.WriteLine($"Please enten number: ");
 
             var userInput = Console.ReadLine();
-            var selectedProduct = _productPrices.FirstOrDefault(x => userInput == x.Key.ToString());
+            var selectedProduct = _products.FirstOrDefault(x => userInput == x.Key.ToString());
             if (userInput.Equals("A", StringComparison.OrdinalIgnoreCase) ||
                 userInput.Equals("Abandon", StringComparison.OrdinalIgnoreCase))
             {
@@ -113,7 +175,7 @@ namespace VendingMachine
             }
             else
             {
-                var productPrice = selectedProduct.Value;
+                var productPrice = selectedProduct.Price;
                 var temperature = "Hot";
                 var burdens = new List<string>();
                 burdens.Add(GetAddBurden("ice"));
@@ -149,5 +211,14 @@ namespace VendingMachine
                 burden :
                 string.Empty;
         }
+    }
+
+    public class MyProduct
+    {
+        public int Location { get; set; }
+
+        public int Key { get; set; }
+
+        public decimal Price { get; set; }
     }
 }
