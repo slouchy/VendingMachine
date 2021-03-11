@@ -99,6 +99,15 @@ namespace VendingMachine
             {
                 var productPrice = selectedProduct.Value;
                 var temperature = "Hot";
+                var ice = string.Empty;
+
+                Console.WriteLine("Add Ice (Y/N) ?");
+                userInput = Console.ReadLine();
+                if (userInput.Equals("Y", StringComparison.OrdinalIgnoreCase))
+                {
+                    ice = "added ice";
+                }
+
                 Console.WriteLine("Choose Product is (C)Cold +$5 or (H)Hot ?");
                 userInput = Console.ReadLine();
                 if (userInput.Equals("C", StringComparison.OrdinalIgnoreCase) ||
@@ -114,7 +123,7 @@ namespace VendingMachine
                 }
                 else
                 {
-                    Console.WriteLine($"Got Product ({selectedProduct.Key}) {temperature} ");
+                    Console.WriteLine($"Got Product ({selectedProduct.Key}) {temperature} {ice}");
                     _totalAmount -= productPrice;
                 }
             }
