@@ -15,8 +15,6 @@ namespace VendingMachine
             [4] = 10,
             [5] = 20,
         };
-        private static decimal _productPrice = 50;
-
 
         static void Main(string[] args)
         {
@@ -36,15 +34,7 @@ namespace VendingMachine
                         break;
                     case "B":
                     case "BUY":
-                        var minProdcutPrice = _productPrices.Min(x => x.Value);
-                        if (_totalAmount < minProdcutPrice)
-                        {
-                            Console.WriteLine($"Min product price is ${minProdcutPrice}, but there is only total: ${_totalAmount}");
-                        }
-                        else
-                        {
-                            ChooseProduct();
-                        }
+                        ChooseProduct();
                         break;
                     case "C":
                     case "REFUND":
@@ -90,14 +80,12 @@ namespace VendingMachine
 
         static void ChooseProduct()
         {
-            IEnumerable<KeyValuePair<int, decimal>> filterProducts = _productPrices.Where(x => x.Value <= _totalAmount);
-            var productOption = filterProducts.Select(x => $"Product ({x.Key}) Price: {x.Value}");
-            Console.WriteLine($"Can Buy : {string.Join(" , ", productOption)}. Or Choose (A)Abandon choose product");
+            var productOptions = _productPrices.Select(x => $"Product({x.Key}) Price:{x.Value}");
+            Console.WriteLine($"Buy : {string.Join(" , ", productOptions)}. Or Choose (A)Abandon choose product");
             Console.WriteLine($"Please enten number: ");
+
             var userInput = Console.ReadLine();
-
-            var selectedProduct = filterProducts.FirstOrDefault(x => userInput == x.Key.ToString());
-
+            var selectedProduct = _productPrices.FirstOrDefault(x => userInput == x.Key.ToString());
             if (userInput.Equals("A", StringComparison.OrdinalIgnoreCase) ||
                 userInput.Equals("Abandon", StringComparison.OrdinalIgnoreCase))
             {
@@ -109,8 +97,26 @@ namespace VendingMachine
             }
             else
             {
-                Console.WriteLine($"Got Product ({selectedProduct.Key})");
-                _totalAmount -= selectedProduct.Value;
+                var productPrice = selectedProduct.Value;
+                var temperature = "Hot";
+                Console.WriteLine("Choose Product is (C)Cold +$5 or (H)Hot ?");
+                userInput = Console.ReadLine();
+                if (userInput.Equals("C", StringComparison.OrdinalIgnoreCase) ||
+                userInput.Equals("Cold", StringComparison.OrdinalIgnoreCase))
+                {
+                    productPrice += 5;
+                    temperature = "Cold";
+                }
+
+                if (_totalAmount < productPrice)
+                {
+                    Console.WriteLine($"Product ({selectedProduct.Key}) {temperature} price : ${productPrice}, but there is only : ${_totalAmount}");
+                }
+                else
+                {
+                    Console.WriteLine($"Got Product ({selectedProduct.Key}) {temperature} ");
+                    _totalAmount -= productPrice;
+                }
             }
         }
     }
