@@ -262,7 +262,7 @@ namespace VendingMachine
 
             if (_totalAmount < nPrice)
             {
-                Console.WriteLine($"Error: ProductId ({selectedProduct.Id}) price : ${selectedProduct.Price}, but there is only : ${_totalAmount}");
+                Console.WriteLine($"Error: ProductId ({selectedProduct.Id}) price : ${nPrice}, but there is only : ${_totalAmount}");
                 return;
             }
 
