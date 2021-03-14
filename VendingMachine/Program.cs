@@ -8,6 +8,8 @@ namespace VendingMachine
     {
         private static decimal _totalAmount = 0;
 
+        private static bool _isContinue = true;
+
         private static List<ShelfModel> _shelfs = new List<ShelfModel>
         {
             new ShelfModel
@@ -48,6 +50,7 @@ namespace VendingMachine
                     {
                        Idx=1,
                        Name=Mixture.Ice,
+                       Price = 5
                     },
                     new MixtureModel
                     {
@@ -77,6 +80,7 @@ namespace VendingMachine
                     {
                        Idx=1,
                        Name=Mixture.Ice,
+                       Price=5
                     },
                 }
             }
@@ -86,72 +90,84 @@ namespace VendingMachine
         {
             new ProductModel
             {
+                Id=1,
                 ShelfIdx = 0,
                 LocationIdx = 1,
                 Price = 10,
             },
             new ProductModel
             {
+                Id=2,
                 ShelfIdx = 0,
                 LocationIdx = 2,
                 Price = 20,
             },
             new ProductModel
             {
+                Id=3,
                 ShelfIdx = 0,
                 LocationIdx = 3,
                 Price = 30,
             },
             new ProductModel
             {
+                Id=4,
                 ShelfIdx = 0,
                 LocationIdx = 4,
                 Price = 40,
             },
              new ProductModel
             {
+                Id=5,
                 ShelfIdx = 0,
                 LocationIdx = 5,
                 Price = 50,
             },
             new ProductModel
             {
+                Id=6,
                 ShelfIdx = 0,
                 LocationIdx = 6,
                 Price = 60,
             },
                new ProductModel
             {
+                Id=7,
                 ShelfIdx = 1,
                 LocationIdx = 1,
                 Price = 10,
             },
             new ProductModel
             {
+                Id=8,
                 ShelfIdx = 1,
                 LocationIdx = 2,
                 Price = 20,
             },
             new ProductModel
             {
+                Id=9,
                 ShelfIdx = 1,
                 LocationIdx = 3,
                 Price = 30,
             },
             new ProductModel
             {
+                Id=10,
                 ShelfIdx = 1,
                 LocationIdx = 4,
                 Price = 40,
             },
             new ProductModel
             {
+                Id=11,
                 ShelfIdx = 2,
                 LocationIdx = 3,
                 Price = 30,
             },
             new ProductModel
             {
+                Id=12,
                 ShelfIdx = 2,
                 LocationIdx = 4,
                 Price = 40,
@@ -161,28 +177,25 @@ namespace VendingMachine
 
         static void Main(string[] args)
         {
-            bool isContinue = true;
             Console.WriteLine("Hello Vending machine !");
-            while (isContinue)
+            while (_isContinue)
             {
                 ShowMoney();
                 ShowMainMenu();
-                isContinue = ChooseMainOptions();
+                ChooseMainOptions();
 
                 Console.WriteLine("\r\n===========");
             }
         }
 
-        static bool ChooseMainOptions()
+        static void ChooseMainOptions()
         {
-            var isContinue = true;
             var userInput = Console.ReadLine();
             switch (userInput.ToUpper())
             {
                 case "A":
                 case "COIN":
-                    Console.WriteLine("ADD 10 Coint To vending machine");
-                    _totalAmount += 10;
+                    SetMachineMoney(10);
                     break;
                 case "B":
                 case "BUY":
@@ -198,12 +211,21 @@ namespace VendingMachine
                     break;
                 case "E":
                 case "LEAVE":
-                    Console.WriteLine("LEAVE vending machine");
-                    isContinue = false;
+                    ShowLeaveMessage();
                     break;
             }
+        }
 
-            return isContinue;
+        private static void ShowLeaveMessage()
+        {
+            Console.WriteLine("LEAVE vending machine");
+            _isContinue = false;
+        }
+
+        static void SetMachineMoney(decimal price)
+        {
+            Console.WriteLine($"Set {price} Coint To vending machine");
+            _totalAmount += price;
         }
 
         static void ShowMoney()
@@ -224,57 +246,68 @@ namespace VendingMachine
 
         static void BuyProduct()
         {
-            var userInput = string.Empty;
-            var totalShelf = _shelfs.Count - 1;
-            var selectedShelf = new ShelfModel(); ;
-            var selectedProduct = new ProductModel();
+            DisplayProducts();
 
-            Console.WriteLine($"Choose Product Shelf Number (0~{totalShelf})");
-            userInput = Console.ReadLine();
-            if (!int.TryParse(userInput, out var tmp1) ||
-                tmp1 < 0 ||
-                tmp1 > totalShelf)
+            var userInput = Console.ReadLine();
+            var selectedProduct = GetUserSelectedProduct(userInput);
+            if (selectedProduct == null)
             {
-                Console.WriteLine($"Not Found Shelf.");
-                return;
-            }
-            else
-            {
-                selectedShelf = _shelfs.First(x => x.Idx == tmp1);
-            }
-
-            var (requireds, optionals) = GetShelfOptions(selectedShelf.Idx);
-            var products = _products.Where(x => x.ShelfIdx == selectedShelf.Idx);
-            var productOptions = products.Select(x => $"({x.LocationIdx}). ${x.Price}");
-            Console.WriteLine($"Choose Product Number {string.Join(", ", products.Select(x => x.LocationIdx))}");
-            userInput = Console.ReadLine();
-            if (!int.TryParse(userInput, out var tmp2) ||
-                tmp2 < 0 ||
-                tmp2 > products.Max(x => x.LocationIdx))
-            {
-                Console.WriteLine($"Not Found Product.");
-                return;
-            }
-            else
-            {
-                selectedProduct = products.First(x => x.LocationIdx == tmp2);
-            }
-
-            var userChooseResult = ChooseOptionalMixture(optionals);
-            if (_totalAmount < selectedProduct.Price)
-            {
-                Console.WriteLine($"Shelf {selectedShelf.Idx}, Product ({selectedProduct.LocationIdx}) price : ${selectedProduct.Price}, but there is only : ${_totalAmount}");
+                Console.WriteLine("Error: Not Found Product!!");
                 return;
             }
 
-            _totalAmount -= selectedProduct.Price;
-            Console.WriteLine($"Buy Shelf {selectedShelf.Idx}, location {selectedProduct.LocationIdx} product, with {string.Join(",", requireds.Select(x => x.Name))} and {string.Join(",", userChooseResult.Select(x => x.Name))}");
+            var (requireds, optionals) = GetShelfOptions(selectedProduct.ShelfIdx);
+            var userChooseResults = ChooseOptionalMixture(optionals);
+            var nPrice = GetAllMixturePrice(selectedProduct.Price, requireds, userChooseResults);
+
+            if (_totalAmount < nPrice)
+            {
+                Console.WriteLine($"Error: ProductId ({selectedProduct.Id}) price : ${selectedProduct.Price}, but there is only : ${_totalAmount}");
+                return;
+            }
+
+            SetMachineMoney(-nPrice);
+            ShowBoughtProductInfo(selectedProduct, nPrice, requireds, optionals);
+        }
+
+        private static void ShowBoughtProductInfo(ProductModel product, decimal nPrice, List<MixtureModel> requireds, List<MixtureModel> optionals)
+        {
+            Console.WriteLine($"ProductId ({product.Id}), shelf: {product.ShelfIdx}, Price: {nPrice}, with {string.Join(",", requireds.Select(x => x.Name))} and {string.Join(",", optionals.Select(x => x.Name))}");
+        }
+
+        private static decimal GetAllMixturePrice(decimal price, List<MixtureModel> requireds, List<MixtureModel> userChooseResult)
+        {
+            foreach (var item in requireds)
+            {
+                price += item.Price;
+            }
+
+            foreach (var item in userChooseResult)
+            {
+                price += item.Price;
+            }
+
+            return price;
+        }
+
+        private static ProductModel GetUserSelectedProduct(string userInput)
+        {
+            return _products.FirstOrDefault(x => x.Id.ToString() == userInput);
+        }
+
+        private static void DisplayProducts()
+        {
+            var products = _products.Select(x => $"ProductId ({x.Id}), Price ${x.Price}, Shelf {x.ShelfIdx}");
+            Console.WriteLine($"Display ProductList:\r\n{string.Join("\r\n", products)}\r\n Choose By ProductId (1,2..):");
         }
 
         static (List<MixtureModel> required, List<MixtureModel> optional) GetShelfOptions(int shlfIdx)
         {
             var selected = _shelfs.First(x => x.Idx == shlfIdx);
-            return (selected.Required, selected.Optional);
+            var requireds = selected.Required == null ? new List<MixtureModel>() : selected.Required;
+            var optionals = selected.Optional == null ? new List<MixtureModel>() : selected.Optional;
+
+            return (requireds, optionals);
         }
 
         static List<MixtureModel> ChooseOptionalMixture(List<MixtureModel> options)
@@ -287,7 +320,7 @@ namespace VendingMachine
             var selectedResult = new List<MixtureModel>();
             foreach (var item in options)
             {
-                Console.WriteLine($"Do you Add {item.Name} (Y/N)?");
+                Console.WriteLine($"Do you Add {item.Name} ,Price ${item.Price} (Y/N)?");
                 var userInput = Console.ReadLine();
                 if (userInput.Equals("y", StringComparison.OrdinalIgnoreCase))
                 {
@@ -315,11 +348,13 @@ namespace VendingMachine
 
         public Mixture Name { get; set; }
 
-        public decimal Price { get; set; }
+        public decimal Price { get; set; } = 0;
     }
 
     public class ProductModel
     {
+
+        public int Id { get; set; }
         public int ShelfIdx { get; set; }
 
         public int LocationIdx { get; set; }
